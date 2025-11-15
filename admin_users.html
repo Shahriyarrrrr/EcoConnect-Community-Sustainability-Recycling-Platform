@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin — Users</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand"><div class="logo">EC</div><div><div style="font-weight:700">EcoConnect</div><div class="small">Manage users</div></div></div>
+      <nav class="navbar" id="topNav"></nav>
+    </header>
+
+    <div class="admin-wrapper">
+      <aside class="admin-sidebar">
+        <a href="admin.html">Dashboard</a>
+        <a href="admin_users.html">Users</a>
+        <a href="admin_items.html">Items</a>
+      </aside>
+
+      <section>
+        <div class="card">
+          <h2>Manage Users</h2>
+          <div id="usersTable"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+  <script src="js/admin.service.js"></script>
+  <script src="js/admin.controller.js"></script>
+
+  <script>
+    async function mountUsers(){
+      const s = AuthController.current();
+      if(!s || s.role !== 'admin'){ location.href='login.html'; return; }
+      document.getElementById('topNav').innerHTML = '<a href="admin.html">Dashboard</a><a href="admin_users.html">Users</a>';
+      const users = await AdminController.listUsers();
+      if(!users.length){ usersTable.innerHTML = '<div class="small">No users</div>'; return; }
+      usersTable.innerHTML = `
+        <table class="table">
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>City</th><th>Actions</th></tr></thead>
+          <tbody>${users.map(u=>`
+            <tr>
+              <td>${u.id}</td>
+              <td>${u.name}</td>
+              <td>${u.email}</td>
+              <td>${u.role}</td>
+              <td>${u.city||''}</td>
+              <td>
+                <button class="btn btn-soft" onclick="promote(${u.id})">Promote</button>
+                <button class="btn btn-outline" onclick="demote(${u.id})">Demote</button>
+                <button class="btn btn-danger" onclick="removeUser(${u.id})">Delete</button>
+              </td>
+            </tr>
+          `).join('')}</tbody>
+        </table>
+      `;
+    }
+
+    window.promote = async (id)=>{ await AdminController.promoteUser(id); mountUsers(); };
+    window.demote = async (id)=>{ await AdminController.demoteUser(id); mountUsers(); };
+    window.removeUser = async (id)=>{ if(confirm('Delete user?')){ await AdminController.deleteUser(id); mountUsers(); } };
+
+    mountUsers();
+  </script>
+</body>
+</html>

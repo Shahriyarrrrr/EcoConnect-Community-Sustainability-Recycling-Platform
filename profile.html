@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Profile — EcoConnect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">EC</div>
+        <div>
+          <div style="font-weight:700">EcoConnect</div>
+          <div class="small">Your profile</div>
+        </div>
+      </div>
+      <nav class="navbar" id="topNav"></nav>
+    </header>
+
+    <main class="card" style="max-width:980px;margin:28px auto">
+      <div id="msg"></div>
+      <div class="grid-2">
+        <div>
+          <div style="display:flex;gap:18px;align-items:center">
+            <img id="avatarImg" src="" alt="avatar" style="width:120px;height:120px;border-radius:14px;object-fit:cover;border:1px solid #eee" />
+            <div>
+              <h2 id="displayName">Name</h2>
+              <div class="small" id="displayEmail">email</div>
+              <div style="margin-top:12px">
+                <button id="logoutBtn" class="btn btn-outline">Logout</button>
+              </div>
+            </div>
+          </div>
+
+          <section style="margin-top:20px">
+            <h3>Account</h3>
+            <form id="updateForm">
+              <label>Full name</label>
+              <input id="u_name" type="text" />
+              <label>City</label>
+              <input id="u_city" type="text" />
+              <label>Change avatar</label>
+              <input id="u_avatar" type="file" accept="image/*" />
+              <div style="margin-top:12px">
+                <button class="btn btn-primary" type="submit">Save changes</button>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <div>
+          <h3>Security</h3>
+          <form id="passwordForm">
+            <label>Current password</label>
+            <input id="currentPass" type="password" />
+            <label>New password</label>
+            <input id="newPass" type="password" />
+            <div style="margin-top:12px">
+              <button class="btn btn-primary" type="submit">Change password</button>
+            </div>
+          </form>
+
+          <h3 style="margin-top:20px">Danger zone</h3>
+          <div>
+            <button id="deleteAccount" class="btn btn-danger">Delete account</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+
+  <script>
+    async function mount(){
+      const user = AuthController.current();
+      if(!user){ location.href='login.html'; return; }
+
+      document.getElementById('topNav').innerHTML = '<a href="index.html">Home</a><a href="items.html">Items</a><a href="post_item.html">Post</a>';
+
+      const u = await UserService.findById(user.user_id);
+      document.getElementById('displayName').textContent = u.name;
+      document.getElementById('displayEmail').textContent = u.email;
+      document.getElementById('u_name').value = u.name;
+      document.getElementById('u_city').value = u.city || '';
+      document.getElementById('avatarImg').src = u.avatar || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"></svg>';
+
+      document.getElementById('logoutBtn').addEventListener('click', function(){ AuthController.logout(); location.href='index.html'; });
+
+      document.getElementById('updateForm').addEventListener('submit', async function(e){
+        e.preventDefault();
+        const name = u_name.value.trim();
+        const city = u_city.value.trim();
+        const file = u_avatar.files[0];
+        if(file){
+          const reader = new FileReader();
+          reader.onload = async function(ev){
+            await AuthController.updateProfile({ name, city, avatar: ev.target.result });
+            Utils.showMessage('msg','Profile updated');
+            mount();
+          };
+          reader.readAsDataURL(file);
+        } else {
+          await AuthController.updateProfile({ name, city, avatar: null });
+          Utils.showMessage('msg','Profile updated');
+          mount();
+        }
+      });
+
+      document.getElementById('passwordForm').addEventListener('submit', async function(e){
+        e.preventDefault();
+        const currentPass = document.getElementById('currentPass').value;
+        const newPass = document.getElementById('newPass').value;
+        try {
+          await AuthController.changePassword({ currentPass, newPass });
+          Utils.showMessage('msg','Password changed');
+        } catch (err) {
+          Utils.showMessage('msg', err.message || 'Error', 'error');
+        }
+      });
+
+      document.getElementById('deleteAccount').addEventListener('click', async function(){
+        const ok = confirm('Delete your account permanently?');
+        if(!ok) return;
+        await AuthController.deleteAccount();
+        location.href = 'index.html';
+      });
+    }
+    mount();
+  </script>
+</body>
+</html>

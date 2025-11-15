@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>EcoConnect — Home</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">EC</div>
+        <div>
+          <div style="font-weight:700">EcoConnect</div>
+          <div class="small">Sustainable community platform</div>
+        </div>
+      </div>
+      <nav class="navbar" id="topNav"></nav>
+    </header>
+
+    <main>
+      <section class="card">
+        <h1>Welcome to EcoConnect</h1>
+        <p class="small">Recycle together. Contribute together.</p>
+
+        <div class="grid-2" style="margin-top:22px">
+          <div class="card" style="display:flex;flex-direction:column;justify-content:space-between">
+            <div>
+              <h3>Post Recyclable Items</h3>
+              <p class="small">List unused or waste items and let recyclers collect them responsibly.</p>
+            </div>
+            <div style="margin-top:16px">
+              <button class="btn btn-primary" onclick="location.href='post_item.html'">Post Now</button>
+              <button class="btn btn-soft" style="margin-left:10px" onclick="location.href='items.html'">Browse Items</button>
+            </div>
+          </div>
+
+          <div class="card" style="display:flex;flex-direction:column;justify-content:space-between">
+            <div>
+              <h3>Search Recyclers</h3>
+              <p class="small">Find certified recycling partners near you.</p>
+            </div>
+            <div style="margin-top:16px">
+              <button class="btn btn-primary" onclick="location.href='search.html'">Search</button>
+              <button class="btn btn-outline" style="margin-left:10px" onclick="location.href='recycler_dashboard.html'">Recycler Dashboard</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2>Latest Items</h2>
+          <div class="small">Community contributions</div>
+        </div>
+        <div id="latestItems" style="margin-top:14px"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+  <script src="js/items.service.js"></script>
+  <script src="js/items.controller.js"></script>
+
+  <script>
+    async function mountIndex(){
+      const nav = document.getElementById('topNav');
+      const s = AuthController.current();
+      if (s) {
+        nav.innerHTML = '<a href="index.html">Home</a><a href="items.html">Items</a><a href="post_item.html">Post</a><a href="profile.html">Profile</a>' + (s.role==='admin' ? '<a href="admin.html">Admin</a>' : '');
+      } else {
+        nav.innerHTML = '<a href="index.html">Home</a><a href="login.html">Login</a><a href="register.html">Register</a>';
+      }
+      const latest = await ItemsController.latest(6);
+      const container = document.getElementById('latestItems');
+      if (!latest.length) { container.innerHTML = '<div class="small">No items posted yet.</div>'; return; }
+      container.innerHTML = latest.map(i=>`
+        <div class="item-row">
+          <div>
+            <div style="font-weight:700">${i.title}</div>
+            <div class="small">${i.category} • ${i.city || ''}</div>
+            <div class="small" style="margin-top:6px">${i.quantity || ''}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-soft" onclick="location.href='items.html'">View</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    mountIndex();
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Post Item — EcoConnect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand"><div class="logo">EC</div><div><div style="font-weight:700">EcoConnect</div><div class="small">Post an item</div></div></div>
+      <nav class="navbar" id="topNav"></nav>
+    </header>
+
+    <main class="card" style="max-width:980px;margin:28px auto">
+      <h2>Post Recyclable Item</h2>
+      <div id="msg"></div>
+      <form id="postForm">
+        <div class="grid-2">
+          <div>
+            <label>Title</label>
+            <input id="title" required />
+            <label>Category</label>
+            <select id="category">
+              <option value="plastic">Plastic</option>
+              <option value="glass">Glass</option>
+              <option value="paper">Paper</option>
+              <option value="metal">Metal</option>
+              <option value="e-waste">E-waste</option>
+              <option value="other">Other</option>
+            </select>
+            <label>Quantity</label>
+            <input id="quantity" />
+          </div>
+
+          <div>
+            <label>City</label>
+            <input id="city" />
+            <label>Description</label>
+            <textarea id="desc" rows="4"></textarea>
+            <div style="display:flex;gap:10px">
+              <input id="lat" placeholder="Latitude" />
+              <input id="lng" placeholder="Longitude" />
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px">
+          <button class="btn btn-primary" type="submit">Post Item</button>
+          <button type="button" class="btn btn-soft" onclick="location.href='items.html'">Cancel</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+  <script src="js/items.service.js"></script>
+  <script src="js/items.controller.js"></script>
+
+  <script>
+    async function mount(){
+      const s = AuthController.current();
+      if(!s){ location.href='login.html'; return; }
+      document.getElementById('topNav').innerHTML = '<a href="index.html">Home</a><a href="items.html">Items</a><a href="profile.html">Profile</a>';
+      postForm.addEventListener('submit', async function(e){
+        e.preventDefault();
+        const payload = {
+          user_id: s.user_id,
+          title: title.value.trim(),
+          category: category.value,
+          quantity: quantity.value.trim(),
+          description: desc.value.trim(),
+          city: city.value.trim(),
+          latitude: lat.value ? parseFloat(lat.value) : null,
+          longitude: lng.value ? parseFloat(lng.value) : null
+        };
+        try {
+          await ItemsController.create(payload);
+          Utils.showMessage('msg','Item posted successfully');
+          setTimeout(()=>location.href='items.html',700);
+        } catch (err) {
+          Utils.showMessage('msg', err.message || 'Error', 'error');
+        }
+      });
+    }
+    mount();
+  </script>
+</body>
+</html>

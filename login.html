@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Login — EcoConnect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">EC</div>
+        <div>
+          <div style="font-weight:700">EcoConnect</div>
+          <div class="small">Community sustainability</div>
+        </div>
+      </div>
+      <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="register.html">Register</a>
+      </nav>
+    </header>
+
+    <main class="card" style="max-width:520px;margin:28px auto">
+      <h2>Login</h2>
+      <div id="msg"></div>
+      <form id="loginForm">
+        <label>Email</label>
+        <input id="email" type="email" required />
+        <label>Password</label>
+        <input id="password" type="password" required />
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <button class="btn btn-primary" type="submit">Login</button>
+          <button type="button" class="btn btn-soft" onclick="location.href='register.html'">Create account</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      try {
+        await AuthController.login({ email, password });
+        location.href = 'index.html';
+      } catch (err) {
+        Utils.showMessage('msg', err.message || 'Login failed', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

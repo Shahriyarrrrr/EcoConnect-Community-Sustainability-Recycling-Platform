@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --primary-50: #E6FFF6;
+  --primary-100: #C9FFE9;
+  --primary-200: #80F7C7;
+  --primary-300: #4CEFAF;
+  --primary-400: #1ADE91;
+  --primary-500: #00C776;
+  --primary-600: #00A365;
+  --primary-700: #008054;
+  --primary-800: #006644;
+  --primary-900: #004B33;
+
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+
+  --background: var(--gray-50);
+  --surface: #ffffff;
+  --radius: 14px;
+
+  --shadow-xs: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+
+  --transition: 0.22s cubic-bezier(.4,0,.2,1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--gray-800);
+  line-height: 1.6;
+}
+
+/* Page Container */
+.container {
+  width: 93%;
+  max-width: 1250px;
+  margin: 40px auto;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  padding: 22px 28px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: var(--primary-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* NAVBAR */
+.navbar a {
+  margin-left: 26px;
+  font-weight: 600;
+  color: var(--gray-700);
+  position: relative;
+  transition: var(--transition);
+}
+
+.navbar a:hover {
+  color: var(--primary-700);
+}
+
+.navbar a::after {
+  content: "";
+  width: 0;
+  height: 2px;
+  background: var(--primary-600);
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  transition: width var(--transition);
+}
+
+.navbar a:hover::after {
+  width: 100%;
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  padding: 32px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-top: 28px;
+  transition: var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* BUTTONS */
+.btn {
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background: var(--primary-600);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-700);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary-700);
+  border: 2px solid var(--primary-600);
+}
+
+.btn-outline:hover {
+  background: var(--primary-100);
+}
+
+.btn-soft {
+  background: var(--primary-50);
+  color: var(--primary-700);
+}
+
+.btn-soft:hover {
+  background: var(--primary-100);
+}
+
+/* FORMS */
+input, select, textarea {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--gray-300);
+  margin-top: 8px;
+  margin-bottom: 18px;
+  font-size: 15px;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary-500);
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+/* GRID */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+@media(max-width: 900px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* SIDEBAR */
+.admin-wrapper {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 32px;
+}
+
+.admin-sidebar {
+  background: var(--surface);
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-sidebar a {
+  display: block;
+  padding: 12px 0;
+  font-weight: 600;
+  color: var(--gray-700);
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.admin-sidebar a:hover {
+  color: var(--primary-700);
+  transform: translateX(4px);
+}

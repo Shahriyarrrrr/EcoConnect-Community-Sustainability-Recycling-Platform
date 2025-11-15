@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Recycler Dashboard — EcoConnect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand"><div class="logo">EC</div><div><div style="font-weight:700">EcoConnect</div><div class="small">Recycler dashboard</div></div></div>
+      <nav class="navbar" id="topNav"></nav>
+    </header>
+
+    <div class="admin-wrapper">
+      <aside class="admin-sidebar">
+        <a href="recycler_dashboard.html">Dashboard</a>
+        <a href="recycler_requests.html">Pickup Requests</a>
+        <a href="index.html">Back to Site</a>
+      </aside>
+
+      <section>
+        <div class="card">
+          <h2>Your Profile</h2>
+          <div id="info"></div>
+        </div>
+
+        <div class="card">
+          <h3>Edit Profile</h3>
+          <div id="msg"></div>
+          <form id="updateForm">
+            <label>Name</label>
+            <input id="r_name" />
+            <label>Contact</label>
+            <input id="r_contact" />
+            <label>City</label>
+            <input id="r_city" />
+            <label>Operating Hours</label>
+            <input id="r_hours" />
+            <label>Services Offered</label>
+            <textarea id="r_services" rows="3"></textarea>
+            <div style="margin-top:12px">
+              <button class="btn btn-primary" type="submit">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+  <script src="js/recycler.service.js"></script>
+  <script src="js/recycler.controller.js"></script>
+
+  <script>
+    async function mount(){
+      const s = AuthController.current();
+      if(!s || s.role !== 'recycler'){ location.href='login.html'; return; }
+      document.getElementById('topNav').innerHTML = '<a href="index.html">Home</a><a href="recycler_dashboard.html">Dashboard</a><a href="recycler_requests.html">Requests</a>';
+      const r = await RecyclerController.myProfile(s.user_id);
+      info.innerHTML = `<div style="font-weight:700">${r.name}</div><div class="small">${r.city||''}</div><div class="small">${r.contact||''}</div><div class="small">${r.hours||''}</div>`;
+      r_name.value = r.name; r_contact.value = r.contact || ''; r_city.value = r.city || ''; r_hours.value = r.hours || ''; r_services.value = r.services || '';
+
+      updateForm.addEventListener('submit', async function(e){
+        e.preventDefault();
+        const data = { name: r_name.value.trim(), contact: r_contact.value.trim(), city: r_city.value.trim(), hours: r_hours.value.trim(), services: r_services.value.trim() };
+        await RecyclerController.updateProfile(s.user_id, data);
+        Utils.showMessage('msg','Profile updated');
+        mount();
+      });
+    }
+    mount();
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Search Recyclers — EcoConnect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand"><div class="logo">EC</div><div><div style="font-weight:700">EcoConnect</div><div class="small">Find recyclers</div></div></div>
+      <nav class="navbar" id="topNav"></nav>
+    </header>
+
+    <main class="card">
+      <h2>Find Recyclers</h2>
+      <div style="display:flex;gap:12px;margin-top:12px">
+        <input id="city" placeholder="Search by city" />
+        <button id="useLocation" class="btn btn-outline">Use My Location</button>
+        <select id="radius" style="width:120px">
+          <option value="5">5km</option>
+          <option value="10" selected>10km</option>
+          <option value="20">20km</option>
+        </select>
+        <button id="searchBtn" class="btn btn-primary">Search</button>
+      </div>
+
+      <div id="results" style="margin-top:18px"></div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+  <script src="js/recyclers.service.js"></script>
+  <script src="js/recyclers.controller.js"></script>
+
+  <script>
+    let userLat = null, userLng = null;
+
+    async function render(list){
+      results.innerHTML = list.length ? list.map(r=>`
+        <div class="item-row">
+          <div>
+            <div style="font-weight:700">${r.name}</div>
+            <div class="small">${r.city || ''}</div>
+            <div class="small">${r.contact || r.email || ''}</div>
+            <div class="small">${r.distance ? r.distance + ' km' : ''}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-soft" onclick="copyContact('${(r.contact||r.email||'').replace("'","\\'")}')">Copy</button>
+          </div>
+        </div>
+      `).join('') : '<div class="small">No recyclers found.</div>';
+    }
+
+    function copyContact(text){ if(!text) return alert('No contact'); navigator.clipboard.writeText(text).then(()=>alert('Copied')); }
+
+    useLocation.addEventListener('click', function(){
+      if(!navigator.geolocation) { alert('Geolocation not supported'); return; }
+      navigator.geolocation.getCurrentPosition(pos=>{
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        alert('Location captured');
+      }, (err)=> alert('Could not get location: ' + err.message));
+    });
+
+    searchBtn.addEventListener('click', async function(){
+      const c = city.value.trim();
+      const r = parseFloat(radius.value);
+      let list = [];
+      if(c) list = await RecyclersController.searchByCity(c);
+      else if (userLat && userLng) list = await RecyclersController.searchNearby(userLat, userLng, r);
+      else { alert('Enter city or use location'); return; }
+      render(list);
+    });
+
+    async function mount(){
+      const s = AuthController.current();
+      document.getElementById('topNav').innerHTML = s ? '<a href="index.html">Home</a><a href="post_item.html">Post</a><a href="profile.html">Profile</a>' : '<a href="login.html">Login</a><a href="register.html">Register</a>';
+    }
+    mount();
+  </script>
+</body>
+</html>

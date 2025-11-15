@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Items — EcoConnect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand"><div class="logo">EC</div><div><div style="font-weight:700">EcoConnect</div><div class="small">Items</div></div></div>
+      <nav class="navbar" id="topNav"></nav>
+    </header>
+
+    <main class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>All Items</h2>
+        <div class="small">Find and request pickups</div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:14px">
+        <select id="filterCategory" style="width:220px">
+          <option value="">All Categories</option>
+          <option value="plastic">Plastic</option>
+          <option value="glass">Glass</option>
+          <option value="paper">Paper</option>
+          <option value="metal">Metal</option>
+          <option value="e-waste">E-waste</option>
+          <option value="other">Other</option>
+        </select>
+        <input id="filterCity" placeholder="City" />
+      </div>
+
+      <div id="itemsList" style="margin-top:18px"></div>
+      <div id="pagination" style="margin-top:18px;text-align:center"></div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+  <script src="js/items.service.js"></script>
+  <script src="js/items.controller.js"></script>
+
+  <script>
+    let currentPage = 1;
+    const perPage = 6;
+
+    async function loadItems(){
+      const category = filterCategory.value;
+      const city = filterCity.value.trim();
+      const all = await ItemsController.list({ category, city });
+      const start = (currentPage - 1) * perPage;
+      const subset = all.slice(start, start + perPage);
+      itemsList.innerHTML = subset.length ? subset.map(i=>`
+        <div class="item-row">
+          <div>
+            <div style="font-weight:700">${i.title}</div>
+            <div class="small">${i.category} • ${i.city || ''}</div>
+            <div class="small" style="margin-top:6px">${i.quantity || ''}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-soft" onclick="requestPickup(${i.id})">Request Pickup</button>
+          </div>
+        </div>
+      `).join('') : '<div class="small">No items found.</div>';
+
+      const totalPages = Math.ceil(all.length / perPage);
+      pagination.innerHTML = totalPages <= 1 ? '' : (
+        Array.from({length: totalPages}, (_,i)=>i+1).map(num =>
+          `<button onclick="gotoPage(${num})" class="btn ${num===currentPage?'btn-primary':'btn-soft'}">${num}</button>`
+        ).join(' ')
+      );
+    }
+
+    function gotoPage(n){ currentPage = n; loadItems(); }
+
+    async function requestPickup(id){
+      const u = AuthController.current();
+      if(!u){ alert('Login required'); return; }
+      alert('Pickup requested (demo).');
+    }
+
+    filterCategory.addEventListener('change', ()=>{ currentPage=1; loadItems(); });
+    filterCity.addEventListener('keyup', ()=>{ currentPage=1; loadItems(); });
+
+    async function mount(){
+      const s = AuthController.current();
+      document.getElementById('topNav').innerHTML = s ? '<a href="index.html">Home</a><a href="post_item.html">Post</a><a href="profile.html">Profile</a>' : '<a href="login.html">Login</a><a href="register.html">Register</a>';
+      loadItems();
+    }
+    mount();
+  </script>
+</body>
+</html>

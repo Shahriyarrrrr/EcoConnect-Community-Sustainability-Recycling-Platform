@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Register — EcoConnect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">EC</div>
+        <div>
+          <div style="font-weight:700">EcoConnect</div>
+          <div class="small">Join your neighbourhood</div>
+        </div>
+      </div>
+      <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="login.html">Login</a>
+      </nav>
+    </header>
+
+    <main class="card" style="max-width:980px;margin:28px auto">
+      <h2>Create account</h2>
+      <div id="msg"></div>
+      <form id="registerForm">
+        <div class="grid-2">
+          <div>
+            <label>Full name</label>
+            <input id="name" type="text" required />
+            <label>Email</label>
+            <input id="email" type="email" required />
+            <label>Password</label>
+            <input id="password" type="password" required />
+            <div class="small">Minimum 8 characters, include a number and a letter</div>
+            <label>Role</label>
+            <select id="role">
+              <option value="resident">Resident</option>
+              <option value="recycler">Recycler</option>
+            </select>
+          </div>
+
+          <div>
+            <label>City</label>
+            <input id="city" type="text" />
+            <label>Avatar (optional)</label>
+            <input id="avatar" type="file" accept="image/*" />
+            <div style="margin-top:8px">
+              <img id="avatarPreview" src="" alt="" style="width:96px;height:96px;border-radius:12px;display:none;object-fit:cover;border:1px solid #eee" />
+            </div>
+            <label>Latitude</label>
+            <input id="lat" type="text" placeholder="23.8103" />
+            <label>Longitude</label>
+            <input id="lng" type="text" placeholder="90.4125" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:12px">
+          <button class="btn btn-primary" type="submit">Register</button>
+          <button class="btn btn-soft" type="button" onclick="location.href='login.html'">Already have an account</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+
+  <script>
+    const avatarInput = document.getElementById('avatar');
+    const avatarPreview = document.getElementById('avatarPreview');
+
+    avatarInput.addEventListener('change', function(){
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e){
+        avatarPreview.src = e.target.result;
+        avatarPreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      const city = document.getElementById('city').value.trim();
+      const lat = document.getElementById('lat').value ? parseFloat(document.getElementById('lat').value) : null;
+      const lng = document.getElementById('lng').value ? parseFloat(document.getElementById('lng').value) : null;
+
+      if (password.length < 8 || !(/\d/.test(password) && /[a-zA-Z]/.test(password))) {
+        Utils.showMessage('msg','Password must be 8+ characters and include letters and numbers','error');
+        return;
+      }
+
+      if (avatarInput.files && avatarInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async function(ev){
+          try {
+            await AuthController.register({ name, email, password, role, city, lat, lng, avatar: ev.target.result });
+            location.href = 'login.html';
+          } catch (err) {
+            Utils.showMessage('msg', err.message || 'Registration failed', 'error');
+          }
+        };
+        reader.readAsDataURL(avatarInput.files[0]);
+      } else {
+        try {
+          await AuthController.register({ name, email, password, role, city, lat, lng, avatar: '' });
+          location.href = 'login.html';
+        } catch (err) {
+          Utils.showMessage('msg', err.message || 'Registration failed', 'error');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

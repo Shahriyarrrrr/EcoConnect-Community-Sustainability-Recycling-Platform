@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Pickup Requests — EcoConnect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand"><div class="logo">EC</div><div><div style="font-weight:700">EcoConnect</div><div class="small">Pickup requests</div></div></div>
+      <nav class="navbar" id="topNav"></nav>
+    </header>
+
+    <main class="card">
+      <h2>Pickup Requests</h2>
+      <div id="list" style="margin-top:12px"></div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/user.service.js"></script>
+  <script src="js/auth.controller.js"></script>
+  <script src="js/items.service.js"></script>
+  <script src="js/recycler.service.js"></script>
+  <script src="js/recycler.controller.js"></script>
+
+  <script>
+    async function loadRequests(){
+      const s = AuthController.current();
+      if(!s || s.role !== 'recycler'){ location.href='login.html'; return; }
+      document.getElementById('topNav').innerHTML = '<a href="index.html">Home</a><a href="recycler_dashboard.html">Dashboard</a>';
+      const reqs = await RecyclerController.myRequests(s.user_id);
+      list.innerHTML = reqs.length ? reqs.map(r=>`
+        <div class="item-row">
+          <div>
+            <div style="font-weight:700">${r.item.title}</div>
+            <div class="small">${r.item.category} • ${r.item.city}</div>
+            <div class="small">Status: ${r.status}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            ${r.status === 'requested' ? `<button class="btn btn-primary" onclick="accept(${r.id})">Accept</button><button class="btn btn-danger" onclick="reject(${r.id})">Reject</button>` : ''}
+            ${r.status === 'accepted' ? `<button class="btn btn-soft" onclick="complete(${r.id})">Mark Collected</button>` : ''}
+          </div>
+        </div>
+      `).join('') : '<div class="small">No requests</div>';
+    }
+
+    window.accept = async (id)=>{ await RecyclerController.accept(id); loadRequests(); };
+    window.reject = async (id)=>{ await RecyclerController.reject(id); loadRequests(); };
+    window.complete = async (id)=>{ await RecyclerController.complete(id); loadRequests(); };
+
+    loadRequests();
+  </script>
+</body>
+</html>
